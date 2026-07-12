@@ -1,7 +1,9 @@
 # Sample application configuration for DevOps lab
- class-lab-devops-2026
+app:
+  name: class-lab-devops-2026
   version: "1.0.0"
-  environment: development
+  environment: development  
+  
 
 server:
   host: 0.0.0.0
