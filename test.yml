@@ -1,0 +1,16 @@
+name: Usama DevOps Lab
+name: DevOps CI Pipeline
+
+on:
+  push:
+    branches: [ "main", "usama" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Hello World
+        run: echo "Hello, Welcome to DevOps Lab 2026!"
