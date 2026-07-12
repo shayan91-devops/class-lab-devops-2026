@@ -1,0 +1,31 @@
+# Sample application configuration for DevOps lab
+app:
+  name: class-lab-devops-2026
+  version: "1.0.0"
+  environment: development
+
+server:
+  host: 0.0.0.0
+  port: 8080
+  timeout: 30s
+
+database:
+  engine: postgresql
+  host: localhost
+  port: 5432
+  name: devops_lab
+  pool:
+    min_connections: 2
+    max_connections: 10
+
+features:
+  logging: true
+  metrics: true
+  health_check: true
+
+logging:
+  level: info
+  format: json
+  outputs:
+    - console
+    - file
