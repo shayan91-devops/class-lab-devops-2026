@@ -1,0 +1,10 @@
+application:
+  name: test-app
+  version: 1.0
+
+environment:
+  dev:
+    url: https://dev.example.com
+  prod:
+    url: https://prod.example.com
+
