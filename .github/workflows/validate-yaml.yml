@@ -1,0 +1,76 @@
+name: Validate YAML Files
+
+on:
+  pull_request:
+
+jobs:
+  validate-yaml:
+    name: YAML Syntax Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Find all YAML files
+        id: find-yaml
+        run: |
+          files=$(find . -type f \( -name '*.yaml' -o -name '*.yml' \) \
+            ! -path './.git/*' \
+            | sort)
+          if [ -z "$files" ]; then
+            echo "No YAML files found in the repository."
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Found YAML files:"
+          echo "$files"
+          echo "count=$(echo "$files" | wc -l | tr -d ' ')" >> "$GITHUB_OUTPUT"
+
+      - name: Validate YAML syntax
+        if: steps.find-yaml.outputs.count != '0'
+        run: |
+          find . -type f \( -name '*.yaml' -o -name '*.yml' \) \
+            ! -path './.git/*' \
+            -print0 | xargs -0 yamllint -d relaxed
+
+      - name: Validate YAML parses correctly
+        if: steps.find-yaml.outputs.count != '0'
+        run: |
+          python3 << 'EOF'
+          import sys
+          from pathlib import Path
+
+          try:
+              import yaml
+          except ImportError:
+              import subprocess
+              subprocess.check_call([sys.executable, "-m", "pip", "install", "pyyaml"])
+              import yaml
+
+          errors = []
+          for path in sorted(Path(".").rglob("*.yaml")) + sorted(Path(".").rglob("*.yml")):
+              if ".git" in path.parts:
+                  continue
+              try:
+                  with open(path) as f:
+                      list(yaml.safe_load_all(f))
+              except yaml.YAMLError as exc:
+                  errors.append(f"{path}: {exc}")
+
+          if errors:
+              print("YAML parse errors:")
+              for error in errors:
+                  print(f"  - {error}")
+              sys.exit(1)
+
+          print("All YAML files parsed successfully.")
+          EOF
