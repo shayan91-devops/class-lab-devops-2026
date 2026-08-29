@@ -45,4 +45,11 @@ jobs:
 
       - name: Verify deployment
         run: |
-          ssh "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" "curl -sf http://localhost/ | grep -E 'shayan|ijlal|noman'"
+          ssh -o BatchMode=yes -o ConnectTimeout=15 "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" << 'EOF'
+            set -e
+            curl -sf --max-time 10 http://127.0.0.1/ -o /tmp/deploy-check.html
+            grep -q 'shayan' /tmp/deploy-check.html
+            grep -q 'ijlal' /tmp/deploy-check.html
+            grep -q 'noman' /tmp/deploy-check.html
+            echo "Deployment verified successfully"
+          EOF
